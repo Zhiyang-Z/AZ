@@ -5,6 +5,7 @@ from functools import partial
 from typing import NamedTuple
 
 import jax
+jax.config.update("jax_platforms", "cuda")  # only allow GPU
 import jax.numpy as jnp
 import mctx
 import optax
@@ -40,10 +41,10 @@ from common import evaluate_with_random
 if __name__ == "__main__":
     wandb.init(project="chess-az", config=config.model_dump())
     # define neural network
-    az_net = AZNet(num_actions=19*19)
+    az_net = AZNet(num_actions=15*15)
     # Initialize network, warm-up.
     rng_key, subkey = jax.random.split(jax.random.PRNGKey(config.seed), 2)
-    dummy_input = jnp.zeros((32, 19, 19, 17))
+    dummy_input = jnp.zeros((32, 15, 15, 17))
     model_variables = az_net.init(subkey, dummy_input, is_training=True)
     model_state, params = flax.core.pop(model_variables, "params")
     # define train state

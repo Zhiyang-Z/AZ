@@ -13,7 +13,7 @@ def train_step(train_state: train_state.TrainState, batch):
                                                         mutable=list(train_state.model_state.keys()),
                                                         is_training=True)
         policy_loss = optax.softmax_cross_entropy(logits, batch.policy_tgt).mean()
-        value_loss = (optax.l2_loss(v, batch.value_tgt) * batch.mask).mean()
+        value_loss = (optax.l2_loss(v, batch.value_tgt)).mean()
         loss = policy_loss + value_loss
         return loss, (policy_loss, value_loss, new_model_state)
 

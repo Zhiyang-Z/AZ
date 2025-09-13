@@ -63,8 +63,6 @@ class SelfPlay:
                                                 discount=discount,
                                             )
 
-
-
         _, collected_data = jax.lax.scan(one_step, state, step_keys)
 
         # collected_data: SelfplayOutput, each field has shape (max_num_steps, sim_per_dev, ...)
@@ -77,7 +75,7 @@ class TrainBatch:
     value_tgt: jnp.ndarray
     # mask: jnp.ndarray
 
-@partial(jax.pmap, in_axes=(None, 0))
+@partial(jax.pmap, static_broadcasted_argnums=0, in_axes=(None, 0))
 def compute_loss_input(sim_per_dev: int, data: SelfplayOutput) -> TrainBatch:
     max_num_step = data.obs.shape[0]
     # # If episode is truncated, there is no value target

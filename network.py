@@ -21,8 +21,8 @@ class ResidualBlock(nn.Module):
 class AZNet(nn.Module):
     """AlphaZero-like network for Chess with policy and value heads."""
     num_actions: int
-    num_filters: int = 256
-    num_residual_blocks: int = 16
+    num_filters: int = 128
+    num_residual_blocks: int = 8
 
     @nn.compact
     def __call__(self, x, is_training: bool):

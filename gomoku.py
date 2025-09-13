@@ -1,5 +1,4 @@
 import jax
-jax.config.update("jax_platforms", "cuda")  # only allow GPU
 import jax.numpy as jnp
 import chex
 from jax.experimental import checkify

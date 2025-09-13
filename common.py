@@ -8,7 +8,7 @@ from utils import forward
 from omegaconf import OmegaConf
 
 # Initialize environment
-env = Env("gomoku-19x19")
+env = Env("gomoku-15x15")
 
 # In alphazero, there is little difference between standard MCTS algorithm.
 # In standard MCTS, we have 4 steps: selection, expansion, simulation and backpropogation.
@@ -22,11 +22,11 @@ class Config(BaseModel):
     num_filters: int = 256
     num_residual_blocks: int = 16
     # selfplay params
-    selfplay_batch_size: int = 2048 # This is also the total number of games, train once after one batch of games complete.
+    selfplay_batch_size: int = 256 # This is also the total number of games, train once after one batch of games complete.
     num_search: int = 32 # number of simulations per move (one simulation is a loop of simulation, expansion (with NN evaluation) and backpropogation).
-    max_num_steps: int = 19*19 # each game can have at most 256 steps to play.
+    max_num_steps: int = 15*15 # each game can have at most 256 steps to play.
     # training params
-    training_batch_size: int = 512 # after MCTS, we have selfplay_batch_size * max_num_steps samples to train on.
+    training_batch_size: int = 256 # after MCTS, we have selfplay_batch_size * max_num_steps samples to train on.
     learning_rate: float = 0.0001
     # eval params
     eval_interval: int = 8
