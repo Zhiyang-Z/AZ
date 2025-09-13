@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gomoku</title>
+    <style>
+        table { border-collapse: collapse; }
+        td {
+            width: 40px; height: 40px; text-align: center; 
+            border: 1px solid black; font-size: 24px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<h1>Gomoku</h1>
+<button onclick="resetBoard()">Reset</button>
+<table id="board"></table>
+
+<script>
+let boardSize = 19;  // your Gomoku board size
+let boardData = [];
+
+// create empty board
+function emptyBoard() {
+    boardData = [];
+    for (let i = 0; i < boardSize; i++) {
+        let row = [];
+        for (let j = 0; j < boardSize; j++) {
+            row.push('');
+        }
+        boardData.push(row);
+    }
+}
+
+// render board
+function createBoard() {
+    const table = document.getElementById('board');
+    table.innerHTML = '';
+    for (let i = 0; i < boardSize; i++) {
+        let row = table.insertRow();
+        for (let j = 0; j < boardSize; j++) {
+            let cell = row.insertCell();
+            cell.dataset.row = i;
+            cell.dataset.col = j;
+            cell.onclick = () => makeMove(i, j);
+            // cell.innerHTML = boardData[i][j];
+        }
+    }
+}
+
+// update board from server data
+function updateBoard(serverBoard) {
+    for (let i = 0; i < boardSize; i++) {
+        for (let j = 0; j < boardSize; j++) {
+            // convert numeric board (0,1,-1) to symbols
+            if (serverBoard[i][j] === 1) boardData[i][j] = 'X';
+            else if (serverBoard[i][j] === -1) boardData[i][j] = 'O';
+            else boardData[i][j] = '';
+        }
+    }
+    createBoard();
+}
+
+// reset board
+function resetBoard() {
+    fetch('/reset', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => updateBoard(data.board));
+}
+
+// make move
+function makeMove(row, col) {
+    fetch('/move', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: [row, col]})
+    })
+    .then(res => res.json())
+    .then(data => updateBoard(data.board));
+}
+
+// initialize empty board
+emptyBoard();
+createBoard();
+</script>
+</body>
+</html>
