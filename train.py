@@ -106,7 +106,7 @@ if __name__ == "__main__":
             print(log)
 
             # store checkpoints
-            save_path = f'/home/zhiyang/projects/class_projects/MARL/final/saved_params/AZ_gomoku_{iter:06d}'
+            save_path = f'/home/zzhang18/proj/AZ/saved_params/AZ_gomoku_{iter:06d}'
             # unreplicate the whole TrainState
             train_state_to_save = unreplicate(train_state)
             ckpt = {
