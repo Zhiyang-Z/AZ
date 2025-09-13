@@ -94,8 +94,8 @@ class Env:
         row, col = action // self._board_size, action % self._board_size
         new_piece_plane = player_piece.at[row, col].set(1) # expect for new memory allocated tensor (JAX immutable)
         # check win
-        current_board = jnp.logical_or(opponent_piece, player_piece) # combine opponent's and player's pieces to get current board.
-        win = self._check_win(current_board)
+        current_board = jnp.logical_or(opponent_piece, new_piece_plane) # combine opponent's and player's pieces to get current board.
+        win = self._check_win(new_piece_plane)
         # assemble returns
         next_player_plane = jnp.full((self._board_size, self._board_size, 1), 1-state.current_player, dtype=jnp.float32) # flip current player
         new_observation = jnp.concatenate([new_piece_plane[..., jnp.newaxis], state.observation[..., :15], next_player_plane], axis=-1)
@@ -111,23 +111,41 @@ class Env:
                 legal_action_mask=legal_action_mask,
                 done=done
             ), reward, done
+    
+    @partial(jax.jit, static_argnums=0, backend='gpu')
+    def get_cur_board(self, state: State) -> tuple:
+        # to get current board, we only support batch size = 1 for now.
+        chex.assert_shape(state.observation, (1, self._board_size, self._board_size, 17))
+        current_player_piece = jnp.where(state.observation[..., 1], 2*state.current_player-1, 0)
+        oppo_piece = jnp.where(state.observation[..., 0], 1-2*state.current_player, 0)
+        current_board = current_player_piece + oppo_piece
+        chex.assert_shape(current_board, (1, self._board_size, self._board_size))
+        return current_board[0]
+    
+    def print_board(self, state: State):
+        board = self.get_cur_board(state)
+        board = jax.device_get(board) # move to CPU for printing
+        board_str = '\n'.join([' '.join([('.' if cell==0 else ('o' if cell==1 else 'x')) for cell in row]) for row in board])
+        print(board_str)
+
 
 
 if __name__ == "__main__":
-    env = Env("gomoku-19x19")
+    env = Env("gomoku-15x15")
 
     rngkey, subkey = jax.random.split(jax.random.PRNGKey(0), 2)
-    env_keys = jax.random.split(subkey, 4096)
+    env_keys = jax.random.split(subkey, 1)
     states = env.reset(env_keys)
     print(states.observation.shape)
     print(states.current_player.shape)
     print(states.legal_action_mask.shape)
     print(states.done.shape)
-    states, rewards, done = (env.step)(states, jnp.ones((4096), dtype=jnp.int8))
+    states, rewards, done = (env.step)(states, jnp.ones((1), dtype=jnp.int8))
     print(rewards.shape, done.shape)
     # print(states.observation[0,:,:,0])
     # print(rewards.shape, done.shape)
-    states, rewards, done = (env.step)(states, jnp.zeros((4096), dtype=jnp.int8))
+    states, rewards, done = (env.step)(states, jnp.zeros((1), dtype=jnp.int8))
     print(rewards.shape, done.shape)
+    env.print_board(states)
     # print(states.observation[0,:,:,0])
     # print(rewards.shape, done.shape)
