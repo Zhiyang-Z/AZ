@@ -89,7 +89,7 @@ def evaluate_with_random(rng_key, train_state):
                                                     rng_key=subkey,
                                                     root=random_root_fn(state),
                                                     recurrent_fn=random_recurrent_fn,
-                                                    num_simulations=config.num_search,
+                                                    num_simulations=128,
                                                     invalid_actions=~state.legal_action_mask,
                                                     qtransform=mctx.qtransform_completed_by_mix_value,
                                                     gumbel_scale=1.0,
