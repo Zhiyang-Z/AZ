@@ -125,7 +125,13 @@ class Env:
     def print_board(self, state: State):
         board = self.get_cur_board(state)
         board = jax.device_get(board) # move to CPU for printing
-        board_str = '\n'.join([' '.join([('.' if cell==0 else ('o' if cell==1 else 'x')) for cell in row]) for row in board])
+        row_idx = -1
+        board_str = '   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4\n'
+        for row in board:
+            row_idx += 1
+            suffix = (' ' if row_idx < 10 else '') + (str(row_idx) if row_idx < 10 else str(row_idx)) + ' '
+            row_str = suffix + ' '.join([('.' if cell==0 else ('o' if cell==1 else 'x')) for cell in row]) + '\n'
+            board_str += row_str
         print(board_str)
 
 
